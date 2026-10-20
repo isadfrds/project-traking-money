@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | MoneyTrack</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+        }
+
+        .sidebar {
+            width: 250px;
+        }
+
+        .main-content {
+            min-width: 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .stat-card {
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+        }
+
+        .form-input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 11px 12px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px #d1fae5;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+            border-radius: 10px;
+            padding: 11px 16px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+        }
+
+        .btn-secondary {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            color: #475569;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            text-align: left;
+            padding: 15px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+
+        .transaction-table th {
+            color: #64748b;
+            font-weight: 600;
+            background: #f8fafc;
+        }
+
+        .transaction-table td {
+            color: #334155;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen md:flex">
+        <aside class="sidebar bg-white border-r border-slate-200 p-5 md:min-h-screen md:fixed md:left-0 md:top-0 md:flex md:flex-col">
+            <a href="index.html" class="flex items-center gap-3 mb-9 px-2">
+                <div class="flex items-center justify-center w-11 h-11 rounded-2xl bg-emerald-600 text-white font-bold text-xl">
+                    M
+                </div>
+                <div>
+                    <p class="text-xl font-bold text-slate-900">MoneyTrack</p>
+                    <p class="text-xs text-slate-400">Personal Finance</p>
+                </div>
+            </a>
+
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-3">
+                Menu utama
+            </p>
+
+            <nav class="space-y-1">
+                <a href="#dashboard" class="nav-link active">
+                    <span>▦</span>
+                    Dashboard
+                </a>
+                <a href="#transactions" class="nav-link">
+                    <span>⇄</span>
+                    Transaksi
+                </a>
+                <a href="#budget" class="nav-link">
+                    <span>◷</span>
+                    Anggaran
+                </a>
+                <a href="#analytics" class="nav-link">
+                    <span>▥</span>
+                    Analisis keuangan
+                </a>
+            </nav>
+
+            <div class="mt-10 rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
+                <div class="text-2xl mb-3">✦</div>
+                <p class="font-bold text-slate-800 text-sm">Kelola uang dengan bijak</p>
+                <p class="text-xs text-slate-500 mt-2 leading-5">
+                    Catat setiap transaksi untuk memahami kebiasaan keuanganmu.
+                </p>
+            </div>
+
+            <div class="mt-auto pt-8">
+                <div class="border-t border-slate-100 pt-5">
+                    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                        <p class="text-xs text-slate-400">Hari ini</p>
+                        <p id="currentDate" class="text-sm font-semibold text-slate-700">-</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content flex-1 p-4 sm:p-6 lg:p-9 md:ml-[250px]" id="dashboard">
+            <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                <div>
+                    <p class="text-sm text-slate-500 mb-2">Ringkasan keuanganmu</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
+                        Dashboard
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-2">
+                        Pantau kondisi keuanganmu dalam satu tempat.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button id="downloadPdfButton" type="button" class="btn-secondary bg-white">
+                        Ekspor PDF
+                    </button>
+
+                    <button id="resetAllButton" type="button" class="btn-secondary bg-white" style="color:#e11d48">
+                        Reset semua
+                    </button>
+
+                    <div class="relative">
+                        <button id="avatarButton" type="button" aria-haspopup="true" aria-expanded="false"
+                            class="flex items-center justify-center w-11 h-11 rounded-full bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-100">
+                            --
+                        </button>
+
+                        <div id="avatarMenu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg z-50">
+                            <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                <p id="menuUserName" class="text-sm font-semibold text-slate-800 break-words">Pengguna</p>
+                                <p id="menuUserEmail" class="text-xs text-slate-400 break-all"></p>
+                            </div>
+                            <button id="logoutButton" type="button"
+                                class="w-full text-left rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50">
+                                Keluar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="resetAllUndo" class="hidden mb-6 cursor-pointer">
+                <div class="message bg-amber-50 text-amber-800 flex items-center justify-between gap-3">
+                    <span>Semua data sudah direset ke 0.</span>
+                    <button id="undoResetAllButton" type="button" class="font-semibold underline">Urungkan</button>
+                </div>
+            </div>
+
+            <section class="rounded-3xl bg-slate-950 text-white p-6 sm:p-8 mb-6 overflow-hidden relative">
+                <div class="relative z-10">
+                    <p class="text-sm text-slate-400 mb-3">Total saldo</p>
+                    <h2 id="heroBalance" class="text-3xl sm:text-4xl font-bold mb-6">
+                        Rp0
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                            <p class="text-sm text-slate-400 mb-2">Total pemasukan</p>
+                            <p id="heroIncome" class="text-lg font-bold text-emerald-400">Rp0</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                            <p class="text-sm text-slate-400 mb-2">Total pengeluaran</p>
+                            <p id="heroExpense" class="text-lg font-bold text-rose-400">Rp0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -right-16 -top-20 w-64 h-64 rounded-full border-[35px] border-emerald-500/10"></div>
+                <div class="absolute -right-2 -bottom-36 w-72 h-72 rounded-full border-[45px] border-white/5"></div>
+            </section>
+
+            <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+                <article class="stat-card rounded-2xl bg-white p-5">
+                    <div class="flex items-center justify-between mb-5">
+                        <p class="text-sm text-slate-500">Saldo saat ini</p>
+                        <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 text-xl">↗</span>
+                    </div>
+                    <p id="totalBalance" class="text-2xl font-bold text-slate-900">Rp0</p>
+                    <p class="text-xs text-slate-400 mt-2">Pemasukan dikurangi pengeluaran</p>
+                </article>
+
+                <article class="stat-card rounded-2xl bg-white p-5">
+                    <div class="flex items-center justify-between mb-5">
+                        <p class="text-sm text-slate-500">Pemasukan</p>
+                        <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 text-xl">↓</span>
+                    </div>
+                    <p id="totalIncome" class="text-2xl font-bold text-emerald-600">Rp0</p>
+                    <p class="text-xs text-slate-400 mt-2">Akumulasi uang masuk</p>
+                </article>
+
+                <article class="stat-card rounded-2xl bg-white p-5">
+                    <div class="flex items-center justify-between mb-5">
+                        <p class="text-sm text-slate-500">Pengeluaran</p>
+                        <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 text-xl">↑</span>
+                    </div>
+                    <p id="totalExpense" class="text-2xl font-bold text-rose-600">Rp0</p>
+                    <p class="text-xs text-slate-400 mt-2">Akumulasi uang keluar</p>
+                </article>
+            </section>
+
+            <section id="budget" class="panel p-5 sm:p-6 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Anggaran pengeluaran</h2>
+                        <p class="text-sm text-slate-500 mt-1">Tentukan batas pengeluaranmu.</p>
+                    </div>
+                    <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-2 rounded-full">
+                        Kontrol keuangan
+                    </span>
+                </div>
+
+                <form id="budgetForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="budgetPeriod" class="block text-sm font-semibold text-slate-700 mb-2">
+                            Periode anggaran
+                        </label>
+                        <select id="budgetPeriod" class="form-input" required>
+                            <option value="weekly">Mingguan</option>
+                            <option value="monthly" selected>Bulanan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="budgetAmount" class="block text-sm font-semibold text-slate-700 mb-2">
+                            Batas anggaran (Rp)
+                        </label>
+                        <input id="budgetAmount" type="number" min="1" step="1" placeholder="Contoh: 1000000" class="form-input" required>
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="btn-primary flex-1">Simpan anggaran</button>
+                        <button id="resetBudgetButton" type="button" class="btn-secondary">Reset</button>
+                    </div>
+                </form>
+
+                <div id="budgetAlert" class="hidden mt-4 message"></div>
+
+                <div id="budgetUndo" class="hidden mt-4 cursor-pointer">
+                    <div class="message bg-amber-50 text-amber-800 flex items-center justify-between gap-3">
+                        <span>Anggaran sudah direset ke 0.</span>
+                        <button id="undoBudgetButton" type="button" class="font-semibold underline">Urungkan</button>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div class="flex justify-between items-center gap-3 mb-2">
+                        <p class="text-sm font-semibold text-slate-700">Penggunaan anggaran</p>
+                        <p id="budgetPercent" class="text-sm font-bold text-emerald-700">0%</p>
+                    </div>
+
+                    <div class="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
+                        <div id="budgetBar" class="h-full rounded-full bg-emerald-500 transition-all" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:justify-between gap-2 mt-3 text-sm">
+                        <p id="budgetDetail" class="text-slate-500">Belum ada anggaran.</p>
+                        <p id="budgetRemaining" class="font-semibold text-slate-700">Sisa: Rp0</p>
+                    </div>
+
+                    <p id="heroBudgetPercent" class="hidden">0%</p>
+                    <div id="heroBudgetBar" class="hidden"></div>
+                    <p id="heroBudgetMessage" class="hidden"></p>
+                </div>
+            </section>
+
+            <section id="analytics" class="grid grid-cols-1 xl:grid-cols-5 gap-6 mb-8">
+                <div class="panel p-5 sm:p-6 xl:col-span-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Analisis pengeluaran</h2>
+                            <p class="text-sm text-slate-500 mt-1">Lihat kategori pengeluaranmu.</p>
+                        </div>
+
+                        <select id="chartPeriod" class="form-input sm:w-40">
+                            <option value="month">Bulan ini</option>
+                            <option value="week">Minggu ini</option>
+                            <option value="all">Semua waktu</option>
+                        </select>
+                    </div>
+
+                    <div class="relative min-h-[260px] flex items-center justify-center">
+                        <canvas id="expenseChart"></canvas>
+                        <p id="chartEmpty" class="hidden absolute text-sm text-slate-400 text-center">
+                            Belum ada data pengeluaran untuk ditampilkan.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="panel p-5 sm:p-6 xl:col-span-2">
+                    <h2 class="text-lg font-bold text-slate-900">Ringkasan aktivitas</h2>
+                    <p class="text-sm text-slate-500 mt-1 mb-6">Hasil dari transaksi yang tercatat.</p>
+
+                    <div class="space-y-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm text-slate-500">Total transaksi</p>
+                                <p id="transactionCount" class="text-xl font-bold text-slate-900 mt-1">0</p>
+                            </div>
+                            <span class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl">≡</span>
+                        </div>
+
+                        <div class="h-px bg-slate-100"></div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm text-slate-500">Pemasukan terfilter</p>
+                                <p id="filteredIncome" class="text-lg font-bold text-emerald-600 mt-1">Rp0</p>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-slate-100"></div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm text-slate-500">Pengeluaran terfilter</p>
+                                <p id="filteredExpense" class="text-lg font-bold text-rose-600 mt-1">Rp0</p>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-slate-100"></div>
+
+                        <p class="text-xs leading-5 text-slate-400">
+                            Gunakan pencarian dan filter pada riwayat transaksi untuk melihat data tertentu.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="transactions" class="panel p-5 sm:p-6 mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Riwayat transaksi</h2>
+                        <p class="text-sm text-slate-500 mt-1">Catat dan kelola uang masuk maupun keluar.</p>
+                    </div>
+                </div>
+
+                <form id="transactionForm" class="rounded-2xl bg-slate-50 border border-slate-100 p-4 sm:p-5 mb-7">
+                    <input type="hidden" id="transactionId">
+
+                    <h3 id="transactionFormTitle" class="font-bold text-slate-800 mb-4">
+                        Tambah transaksi
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div>
+                            <label for="transactionName" class="block text-sm font-semibold text-slate-700 mb-2">
+                                Nama transaksi
+                            </label>
+                            <input id="transactionName" type="text" maxlength="150" placeholder="Contoh: Uang makan" class="form-input" required>
+                        </div>
+
+                        <div>
+                            <label for="transactionType" class="block text-sm font-semibold text-slate-700 mb-2">
+                                Jenis transaksi
+                            </label>
+                            <select id="transactionType" class="form-input" required>
+                                <option value="expense">Pengeluaran</option>
+                                <option value="income">Pemasukan</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="transactionCategory" class="block text-sm font-semibold text-slate-700 mb-2">
+                                Kategori
+                            </label>
+                            <select id="transactionCategory" class="form-input" required>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                                <option value="Belanja">Belanja</option>
+                                <option value="Tagihan">Tagihan</option>
+                                <option value="Hiburan">Hiburan</option>
+                                <option value="Kesehatan">Kesehatan</option>
+                                <option value="Gaji">Gaji</option>
+                                <option value="Hadiah">Hadiah</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="transactionAmount" class="block text-sm font-semibold text-slate-700 mb-2">
+                                Nominal (Rp)
+                            </label>
+                            <input id="transactionAmount" type="number" min="1" step="1" placeholder="Contoh: 25000" class="form-input" required>
+                        </div>
+
+                        <div>
+                            <label for="transactionDate" class="block text-sm font-semibold text-slate-700 mb-2">
+                                Tanggal
+                            </label>
+                            <input id="transactionDate" type="date" class="form-input" required>
+                        </div>
+
+                        <div class="flex items-end gap-2">
+                            <button id="saveTransactionButton" type="submit" class="btn-primary flex-1">
+                                Simpan transaksi
+                            </button>
+                            <button id="cancelEditButton" type="button" class="btn-secondary hidden">
+                                Batal
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="transactionMessage" role="status" aria-live="polite" class="hidden mt-4 message"></div>
+                </form>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+                    <div class="sm:col-span-2">
+                        <label for="searchTransaction" class="block text-xs font-semibold text-slate-500 mb-2">
+                            Cari transaksi
+                        </label>
+                        <input id="searchTransaction" type="search" placeholder="Cari nama atau kategori..." class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="filterType" class="block text-xs font-semibold text-slate-500 mb-2">
+                            Jenis
+                        </label>
+                        <select id="filterType" class="form-input">
+                            <option value="all">Semua jenis</option>
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="filterPeriod" class="block text-xs font-semibold text-slate-500 mb-2">
+                            Periode
+                        </label>
+                        <select id="filterPeriod" class="form-input">
+                            <option value="all">Semua waktu</option>
+                            <option value="week">Minggu ini</option>
+                            <option value="month">Bulan ini</option>
+                            <option value="custom">Rentang tanggal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="customDateFilter" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                    <div>
+                        <label for="filterStartDate" class="block text-xs font-semibold text-slate-500 mb-2">
+                            Dari tanggal
+                        </label>
+                        <input id="filterStartDate" type="date" class="form-input">
+                    </div>
+
+                    <div>
+                        <label for="filterEndDate" class="block text-xs font-semibold text-slate-500 mb-2">
+                            Sampai tanggal
+                        </label>
+                        <input id="filterEndDate" type="date" class="form-input">
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Nama transaksi</th>
+                                <th>Kategori</th>
+                                <th>Tanggal</th>
+                                <th>Jenis</th>
+                                <th>Nominal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-slate-400 py-10">
+                                    Memuat data transaksi...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-5">
+                    <p class="text-xs text-slate-400">
+                        Data transaksi akan ditampilkan setelah koneksi backend aktif.
+                    </p>
+                    <button id="resetFiltersButton" type="button" class="btn-secondary">
+                        Reset filter
+                    </button>
+                </div>
+            </section>
+
+            <footer class="flex flex-col sm:flex-row sm:justify-between gap-2 py-4 text-xs text-slate-400">
+                <p>© 2026 MoneyTrack</p>
+                <p>Catat hari ini, rencanakan masa depan.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>

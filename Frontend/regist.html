@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar | MoneyTrack</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .register-background {
+            background:
+                radial-gradient(circle at top right, #d1fae5, transparent 35%),
+                linear-gradient(135deg, #f8fafc, #eef2ff);
+        }
+
+        .register-card {
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.09);
+        }
+    </style>
+</head>
+<body class="register-background min-h-screen flex items-center justify-center p-5">
+    <main class="w-full max-w-5xl grid md:grid-cols-2 bg-white rounded-3xl overflow-hidden register-card">
+        <section class="hidden md:flex flex-col justify-between bg-slate-950 text-white p-12">
+            <a href="login.html" class="text-2xl font-bold tracking-tight">
+                Money<span class="text-emerald-400">Track.</span>
+            </a>
+
+            <div>
+                <p class="text-sm font-semibold text-emerald-400 mb-4">
+                    MULAI KELOLA KEUANGANMU
+                </p>
+
+                <h1 class="text-4xl font-bold leading-tight mb-5">
+                    Kebiasaan kecil, masa depan finansial lebih baik.
+                </h1>
+
+                <p class="text-slate-400 leading-7">
+                    Buat catatan keuangan yang lebih teratur, pahami pengeluaran,
+                    dan rencanakan anggaranmu dengan lebih percaya diri.
+                </p>
+
+                <div class="mt-10 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400">01</span>
+                        <span class="text-slate-300">Catat pemasukan dan pengeluaran</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400">02</span>
+                        <span class="text-slate-300">Pantau anggaran secara berkala</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400">03</span>
+                        <span class="text-slate-300">Bangun kebiasaan finansial yang sehat</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-sm text-slate-500">
+                © 2026 MoneyTrack
+            </p>
+        </section>
+
+        <section class="p-7 sm:p-10 md:p-12">
+            <div class="md:hidden mb-8">
+                <a href="login.html" class="text-2xl font-bold text-slate-900">
+                    Money<span class="text-emerald-600">Track.</span>
+                </a>
+            </div>
+
+            <div class="mb-7">
+                <p class="text-sm font-semibold text-emerald-600 mb-3">
+                    BUAT AKUN BARU
+                </p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">
+                    Bergabung dengan MoneyTrack
+                </h2>
+
+                <p class="text-slate-500 leading-6">
+                    Isi data berikut untuk mulai mengelola keuanganmu.
+                </p>
+            </div>
+
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-slate-700 mb-2">
+                        Nama lengkap
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Masukkan nama lengkap"
+                        autocomplete="name"
+                        maxlength="150"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    >
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="nama@email.com"
+                        autocomplete="email"
+                        maxlength="254"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Minimal 8 karakter"
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    >
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-semibold text-slate-700 mb-2">
+                        Konfirmasi password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Masukkan ulang password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    >
+                </div>
+
+                <label class="flex items-start gap-3 text-sm text-slate-600 leading-5">
+                    <input
+                        type="checkbox"
+                        id="agree"
+                        name="agree"
+                        required
+                        class="mt-1 h-4 w-4 accent-emerald-600"
+                    >
+                    <span>Saya menyetujui penggunaan MoneyTrack untuk mengelola catatan keuangan pribadi saya.</span>
+                </label>
+
+                <div id="registerMessage" role="status" aria-live="polite" class="hidden rounded-xl p-3 text-sm"></div>
+
+                <button
+                    type="submit"
+                    id="registerButton"
+                    class="w-full rounded-xl bg-emerald-600 py-3.5 font-semibold text-white transition hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    Buat akun
+                </button>
+            </form>
+
+            <p class="text-center text-sm text-slate-500 mt-7">
+                Sudah punya akun?
+                <a href="login.html" class="font-semibold text-emerald-600 hover:text-emerald-700">
+                    Masuk di sini
+                </a>
+            </p>
+        </section>
+    </main>
+     <script src="js/api.js"></script>
+    <script src="js/regist.js"></script>
+</body>
+</html>
