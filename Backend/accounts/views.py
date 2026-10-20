@@ -75,10 +75,12 @@ def login_view(request):
     return JsonResponse({"user": user_data(user)})
 
 
+
 @require_POST
 def logout_view(request):
     logout(request)
     return JsonResponse({"message": "Berhasil keluar."})
+
 
 
 @require_GET

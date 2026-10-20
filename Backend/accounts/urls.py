@@ -1,10 +1,11 @@
+
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("csrf/", views.csrf),
-    path("register/", views.register),
-    path("login/", views.login_view),
-    path("logout/", views.logout_view),
-    path("me/", views.me),
+    path("csrf/", views.csrf, name="csrf"),
+    path("register/", views.register, name="register"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
+    path("me/", views.me, name="me"),
 ]

@@ -210,9 +210,9 @@ def budget(request):
             return JsonResponse({"message": error}, status=400)
 
         item, _ = Budget.objects.update_or_create(
-            user=request.user,
-            defaults=parsed
-        )
+                        user=request.user,
+                        defaults=parsed
+                    )
 
         return JsonResponse({
             "budget": {

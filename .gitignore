@@ -1,20 +1,10 @@
 
-# Environment dan rahasia
+.venv/
+**/__pycache__/
+*.py[cod]
 .env
 .env.*
 !.env.example
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-
-# Database lokal
 db.sqlite3
-*.sqlite3
-
-# File editor dan sistem
-.vscode/
-.DS_Store
-Thumbs.db
+**/staticfiles/
+.pytest_cache/

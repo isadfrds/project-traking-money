@@ -13,26 +13,37 @@ async function apiRequest(path, options = {}) {
     const method = (options.method || "GET").toUpperCase();
 
     if (method !== "GET" && !getCookie("csrftoken")) {
-        await fetch(`${API_BASE}/accounts/csrf/`, {
+        const csrfResponse = await fetch(`${API_BASE}/accounts/csrf/`, {
             credentials: "include"
         });
+
+        if (!csrfResponse.ok) {
+            throw new Error("Gagal mendapatkan token keamanan.");
+        }
+    }
+
+    const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+    };
+
+    if (method !== "GET") {
+        const token = getCookie("csrftoken");
+
+        if (token) {
+            headers["X-CSRFToken"] = token;
+        }
     }
 
     const response = await fetch(`${API_BASE}${path}`, {
         ...options,
         credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-            ...(options.headers || {})
-        }
+        headers
     });
 
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        console.error("API Error:", response.status, data);
-
         throw new Error(
             data.message ||
             data.error ||

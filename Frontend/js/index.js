@@ -705,15 +705,16 @@ async function undoResetAll() {
     }
 }
 
+
 async function loadUser() {
     try {
         const result = await apiRequest("/accounts/me/");
 
-        if (!result) {
-            throw new Error("Backend tidak mengembalikan data pengguna.");
+        if (!result || !result.user) {
+            throw new Error("Data pengguna tidak ditemukan.");
         }
 
-        state.user = result.user || result;
+        state.user = result.user;
 
         const displayName =
             state.user.name ||
@@ -727,23 +728,33 @@ async function loadUser() {
         return true;
     } catch (error) {
         console.error("Gagal memeriksa sesi login:", error);
-        alert("Pemeriksaan login gagal: " + error.message);
+
+        window.location.replace("login.html");
+
         return false;
     }
 }
 
+
+
 async function logout() {
+    const button = $("logoutButton");
+    button.disabled = true;
+
     try {
         await apiRequest("/accounts/logout/", {
             method: "POST",
             body: JSON.stringify({})
         });
-    } catch (error) {
-        console.error("Logout:", error.message);
-    }
 
-    window.location.href = "login.html";
+        window.location.replace("login.html");
+    } catch (error) {
+        console.error("Logout gagal:", error);
+        alert("Gagal keluar dari akun. Periksa koneksi lalu coba lagi.");
+        button.disabled = false;
+    }
 }
+
 
 function resetFilters() {
     $("searchTransaction").value = "";
