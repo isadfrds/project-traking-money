@@ -1,6 +1,6 @@
 // Lokal (Live Server): API di port 8000. Online: API di alamat yang sama (/api).
 const IS_LOCAL = ["127.0.0.1", "localhost"].includes(window.location.hostname);
-const API_BASE = IS_LOCAL ? `http://${window.location.hostname}:8000/api` : "/api";
+const API_BASE = IS_LOCAL ? `project-traking-money-6tqt189yk-isad3.vercel.app/api` : "/api";
 
 function getCookie(name) {
     const match = document.cookie
