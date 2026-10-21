@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "")
-DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -20,6 +20,11 @@ ALLOWED_HOSTS = [
     ).split(",")
     if host.strip()
 ]
+
+# Render mengisi variabel ini otomatis, jadi tidak perlu diketik manual.
+RENDER_HOST = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if RENDER_HOST and RENDER_HOST not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_HOST)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,6 +77,7 @@ if DATABASE_URL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
+            conn_health_checks=True,
             ssl_require=True,
         )
     }

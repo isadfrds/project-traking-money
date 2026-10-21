@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://GANTI-DENGAN-DOMAIN-BACKEND-KAMU/api/:path*"
+    },
+    { "source": "/", "destination": "/login.html" }
+  ]
+}
