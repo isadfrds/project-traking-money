@@ -29,6 +29,8 @@ function getToday() {
 }
 
 function showMessage(element, message, success = false) {
+    if (!element) return;
+
     element.textContent = message;
     element.classList.remove(
         "hidden",
@@ -95,9 +97,7 @@ function getDateStart(period) {
 }
 
 function isWithinPeriod(dateString, period) {
-    if (period === "all") {
-        return true;
-    }
+    if (period === "all") return true;
 
     const date = new Date(`${dateString}T00:00:00`);
     const start = getDateStart(period);
@@ -199,8 +199,7 @@ function updateBudget() {
     const relevantTransactions = state.transactions.filter((item) => {
         if (item.type !== "expense") return false;
 
-        const budgetPeriod =
-            period === "weekly" ? "week" : "month";
+        const budgetPeriod = period === "weekly" ? "week" : "month";
 
         return isWithinPeriod(item.date, budgetPeriod);
     });
@@ -315,19 +314,13 @@ function renderTransactions() {
             editButton.type = "button";
             editButton.textContent = "Edit";
             editButton.className = "text-emerald-700 font-semibold mr-3";
-            editButton.addEventListener(
-                "click",
-                () => editTransaction(transaction)
-            );
+            editButton.addEventListener("click", () => editTransaction(transaction));
 
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
             deleteButton.textContent = "Hapus";
             deleteButton.className = "text-rose-600 font-semibold";
-            deleteButton.addEventListener(
-                "click",
-                () => deleteTransaction(transaction.id)
-            );
+            deleteButton.addEventListener("click", () => deleteTransaction(transaction.id));
 
             actionCell.append(editButton, deleteButton);
             row.append(
@@ -376,16 +369,9 @@ function renderChart() {
             datasets: [{
                 data: values,
                 backgroundColor: [
-                    "#059669",
-                    "#2563eb",
-                    "#f59e0b",
-                    "#e11d48",
-                    "#7c3aed",
-                    "#0891b2",
-                    "#ea580c",
-                    "#64748b",
-                    "#84cc16",
-                    "#d946ef"
+                    "#059669", "#2563eb", "#f59e0b", "#e11d48",
+                    "#7c3aed", "#0891b2", "#ea580c", "#64748b",
+                    "#84cc16", "#d946ef"
                 ],
                 borderWidth: 2,
                 borderColor: "#ffffff"
@@ -395,9 +381,7 @@ function renderChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: "bottom"
-                },
+                legend: { position: "bottom" },
                 tooltip: {
                     callbacks: {
                         label(context) {
@@ -412,7 +396,7 @@ function renderChart() {
 
 async function loadTransactions() {
     try {
-        const result = await apiRequest("/finance/transactions/");
+        const result = await apiRequest("/transactions/");
 
         state.transactions = Array.isArray(result)
             ? result
@@ -420,14 +404,8 @@ async function loadTransactions() {
 
         updateSummary();
     } catch (error) {
-        $("transactionTableBody").innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center text-amber-700 py-10">
-                    Gagal memuat transaksi: ${error.message}
-                </td>
-            </tr>
-        `;
-
+        $("transactionTableBody").textContent =
+            `Gagal memuat transaksi: ${error.message}`;
         console.error("Gagal memuat transaksi:", error);
     }
 }
@@ -447,10 +425,7 @@ async function saveTransaction(event) {
     };
 
     if (!payload.description || payload.amount <= 0 || !payload.date) {
-        showMessage(
-            $("transactionMessage"),
-            "Lengkapi data dan masukkan nominal yang valid."
-        );
+        showMessage($("transactionMessage"), "Lengkapi data dan masukkan nominal yang valid.");
         return;
     }
 
@@ -458,9 +433,7 @@ async function saveTransaction(event) {
     button.disabled = true;
 
     try {
-        const path = id
-            ? `/finance/transactions/${id}/`
-            : "/finance/transactions/";
+        const path = id ? `/transactions/${id}/` : "/transactions/";
 
         await apiRequest(path, {
             method: id ? "PUT" : "POST",
@@ -472,9 +445,7 @@ async function saveTransaction(event) {
 
         showMessage(
             $("transactionMessage"),
-            id
-                ? "Transaksi berhasil diperbarui."
-                : "Transaksi berhasil ditambahkan.",
+            id ? "Transaksi berhasil diperbarui." : "Transaksi berhasil ditambahkan.",
             true
         );
     } catch (error) {
@@ -486,8 +457,7 @@ async function saveTransaction(event) {
 
 function editTransaction(transaction) {
     $("transactionId").value = transaction.id;
-    $("transactionName").value =
-        transaction.description || transaction.name || "";
+    $("transactionName").value = transaction.description || transaction.name || "";
     $("transactionType").value = transaction.type;
     $("transactionCategory").value = transaction.category || "Lainnya";
     $("transactionAmount").value = transaction.amount;
@@ -496,10 +466,7 @@ function editTransaction(transaction) {
     $("saveTransactionButton").textContent = "Simpan perubahan";
     $("cancelEditButton").classList.remove("hidden");
 
-    $("transactionForm").scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
+    $("transactionForm").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function resetTransactionForm() {
@@ -512,22 +479,12 @@ function resetTransactionForm() {
 }
 
 async function deleteTransaction(id) {
-    if (!id || !confirm("Yakin ingin menghapus transaksi ini?")) {
-        return;
-    }
+    if (!id || !confirm("Yakin ingin menghapus transaksi ini?")) return;
 
     try {
-        await apiRequest(`/finance/transactions/${id}/`, {
-            method: "DELETE"
-        });
-
+        await apiRequest(`/transactions/${id}/`, { method: "DELETE" });
         await loadTransactions();
-
-        showMessage(
-            $("transactionMessage"),
-            "Transaksi berhasil dihapus.",
-            true
-        );
+        showMessage($("transactionMessage"), "Transaksi berhasil dihapus.", true);
     } catch (error) {
         showMessage($("transactionMessage"), error.message);
     }
@@ -540,29 +497,21 @@ async function saveBudget(event) {
     const period = $("budgetPeriod").value;
 
     if (!Number.isFinite(amount) || amount <= 0) {
-        showMessage(
-            $("budgetAlert"),
-            "Masukkan nominal anggaran yang valid."
-        );
+        showMessage($("budgetAlert"), "Masukkan nominal anggaran yang valid.");
         return;
     }
 
     try {
-        const result = await apiRequest("/finance/budget/", {
+        const result = await apiRequest("/budget/", {
             method: "PUT",
             body: JSON.stringify({ amount, period })
         });
 
         state.budget = result.budget || result;
-
         dismissBudgetUndo();
         updateSummary();
 
-        showMessage(
-            $("budgetAlert"),
-            "Anggaran berhasil disimpan.",
-            true
-        );
+        showMessage($("budgetAlert"), "Anggaran berhasil disimpan.", true);
     } catch (error) {
         showMessage($("budgetAlert"), error.message);
     }
@@ -570,7 +519,7 @@ async function saveBudget(event) {
 
 async function loadBudget() {
     try {
-        const result = await apiRequest("/finance/budget/");
+        const result = await apiRequest("/budget/");
         state.budget = result.budget || result;
     } catch (error) {
         console.error("Gagal memuat anggaran:", error.message);
@@ -580,25 +529,16 @@ async function loadBudget() {
 
 async function resetBudget() {
     if (!state.budget) {
-        showMessage(
-            $("budgetAlert"),
-            "Belum ada anggaran yang bisa direset."
-        );
+        showMessage($("budgetAlert"), "Belum ada anggaran yang bisa direset.");
         return;
     }
 
-    if (!confirm(
-        "Reset anggaran ke 0? Kamu punya waktu 5 detik untuk mengurungkannya."
-    )) {
-        return;
-    }
+    if (!confirm("Reset anggaran ke 0? Kamu punya waktu 5 detik untuk mengurungkannya.")) return;
 
     const previous = { ...state.budget };
 
     try {
-        await apiRequest("/finance/budget/", {
-            method: "DELETE"
-        });
+        await apiRequest("/budget/", { method: "DELETE" });
 
         state.budget = null;
         $("budgetAmount").value = "";
@@ -612,15 +552,13 @@ async function resetBudget() {
 }
 
 async function undoBudgetReset() {
-    if (!state.previousBudget) {
-        return;
-    }
+    if (!state.previousBudget) return;
 
     const previous = state.previousBudget;
     clearTimeout(budgetUndoTimer);
 
     try {
-        const result = await apiRequest("/finance/budget/", {
+        const result = await apiRequest("/budget/", {
             method: "PUT",
             body: JSON.stringify({
                 amount: previous.amount,
@@ -629,15 +567,9 @@ async function undoBudgetReset() {
         });
 
         state.budget = result.budget || result;
-
         dismissBudgetUndo();
         updateSummary();
-
-        showMessage(
-            $("budgetAlert"),
-            "Anggaran berhasil dikembalikan.",
-            true
-        );
+        showMessage($("budgetAlert"), "Anggaran berhasil dikembalikan.", true);
     } catch (error) {
         showMessage($("budgetAlert"), error.message);
     }
@@ -649,11 +581,7 @@ async function resetAll() {
         return;
     }
 
-    if (!confirm(
-        "Reset SEMUA data? Semua transaksi dan anggaran akan dihapus. Kamu punya waktu 5 detik untuk mengurungkannya."
-    )) {
-        return;
-    }
+    if (!confirm("Reset SEMUA data? Semua transaksi dan anggaran akan dihapus. Kamu punya waktu 5 detik untuk mengurungkannya.")) return;
 
     const backup = {
         transactions: state.transactions.map((item) => ({ ...item })),
@@ -661,17 +589,15 @@ async function resetAll() {
     };
 
     try {
-        await apiRequest("/finance/reset/", {
+        await apiRequest("/reset/", {
             method: "POST",
             body: JSON.stringify({})
         });
 
         state.transactions = [];
         state.budget = null;
-
         dismissBudgetUndo();
         $("budgetAmount").value = "";
-
         resetTransactionForm();
         updateSummary();
 
@@ -683,21 +609,18 @@ async function resetAll() {
 }
 
 async function undoResetAll() {
-    if (!state.backup) {
-        return;
-    }
+    if (!state.backup) return;
 
     const backup = state.backup;
     clearTimeout(resetAllUndoTimer);
 
     try {
-        await apiRequest("/finance/restore/", {
+        await apiRequest("/restore/", {
             method: "POST",
             body: JSON.stringify(backup)
         });
 
         dismissResetAllUndo();
-
         await loadBudget();
         await loadTransactions();
     } catch (error) {
@@ -705,10 +628,9 @@ async function undoResetAll() {
     }
 }
 
-
 async function loadUser() {
     try {
-        const result = await apiRequest("/accounts/me/");
+        const result = await apiRequest("/me/");
 
         if (!result || !result.user) {
             throw new Error("Data pengguna tidak ditemukan.");
@@ -716,10 +638,7 @@ async function loadUser() {
 
         state.user = result.user;
 
-        const displayName =
-            state.user.name ||
-            state.user.email ||
-            "Pengguna";
+        const displayName = state.user.name || state.user.email || "Pengguna";
 
         $("avatarButton").textContent = getInitials(displayName);
         $("menuUserName").textContent = displayName;
@@ -728,21 +647,17 @@ async function loadUser() {
         return true;
     } catch (error) {
         console.error("Gagal memeriksa sesi login:", error);
-
         window.location.replace("login.html");
-
         return false;
     }
 }
-
-
 
 async function logout() {
     const button = $("logoutButton");
     button.disabled = true;
 
     try {
-        await apiRequest("/accounts/logout/", {
+        await apiRequest("/logout/", {
             method: "POST",
             body: JSON.stringify({})
         });
@@ -750,11 +665,10 @@ async function logout() {
         window.location.replace("login.html");
     } catch (error) {
         console.error("Logout gagal:", error);
-        alert("Gagal keluar dari akun. Periksa koneksi lalu coba lagi.");
+        alert("Gagal keluar dari akun: " + error.message);
         button.disabled = false;
     }
 }
-
 
 function resetFilters() {
     $("searchTransaction").value = "";
@@ -764,7 +678,6 @@ function resetFilters() {
     $("filterEndDate").value = "";
     $("chartPeriod").value = "month";
     $("customDateFilter").classList.add("hidden");
-
     updateSummary();
 }
 
@@ -772,9 +685,7 @@ function exportPdf() {
     const JsPdf = window.jspdf && window.jspdf.jsPDF;
 
     if (!JsPdf) {
-        alert(
-            "Library PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman."
-        );
+        alert("Library PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.");
         return;
     }
 
@@ -783,16 +694,13 @@ function exportPdf() {
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (!transactions.length) {
-        alert(
-            "Tidak ada transaksi untuk diekspor. Periksa filter yang sedang aktif."
-        );
+        alert("Tidak ada transaksi untuk diekspor. Periksa filter yang sedang aktif.");
         return;
     }
 
     try {
         const pdf = new JsPdf();
-        const rp = (value) =>
-            formatRupiah(value).replace(/\u00a0/g, " ");
+        const rp = (value) => formatRupiah(value).replace(/\u00a0/g, " ");
 
         const income = transactions
             .filter((item) => item.type === "income")
@@ -836,10 +744,7 @@ function exportPdf() {
                 drawHeader();
             }
 
-            const name = String(
-                item.description || item.name || "-"
-            ).slice(0, 28);
-
+            const name = String(item.description || item.name || "-").slice(0, 28);
             const category = String(item.category || "-").slice(0, 16);
             const sign = item.type === "income" ? "+" : "-";
 
@@ -847,10 +752,7 @@ function exportPdf() {
             pdf.text(name, 38, y);
             pdf.text(category, 98, y);
             pdf.text(item.type === "income" ? "Masuk" : "Keluar", 130, y);
-            pdf.text(`${sign}${rp(item.amount)}`, 196, y, {
-                align: "right"
-            });
-
+            pdf.text(`${sign}${rp(item.amount)}`, 196, y, { align: "right" });
             y += 7;
         });
 
@@ -861,7 +763,6 @@ function exportPdf() {
     }
 }
 
-
 function setAvatarMenu(show) {
     const menu = $("avatarMenu");
     const button = $("avatarButton");
@@ -871,7 +772,6 @@ function setAvatarMenu(show) {
     menu.classList.toggle("hidden", !show);
     button.setAttribute("aria-expanded", String(show));
 }
-
 
 async function initializeDashboard() {
     $("currentDate").textContent = new Date().toLocaleDateString("id-ID", {
@@ -889,18 +789,16 @@ async function initializeDashboard() {
     $("cancelEditButton").addEventListener("click", resetTransactionForm);
     $("logoutButton").addEventListener("click", logout);
     $("downloadPdfButton").addEventListener("click", exportPdf);
+
     const resetFiltersButton = $("resetFiltersButton");
 
     if (resetFiltersButton) {
-        resetFiltersButton.addEventListener("click", function (event) {
+        resetFiltersButton.addEventListener("click", (event) => {
             event.preventDefault();
             resetFilters();
-
-            console.log("Reset filter berhasil diklik");
         });
-    } else {
-        console.error("Tombol resetFiltersButton tidak ditemukan di HTML");
     }
+
     $("resetAllButton").addEventListener("click", resetAll);
     $("undoResetAllButton").addEventListener("click", undoResetAll);
 
@@ -920,15 +818,11 @@ async function initializeDashboard() {
     });
 
     document.addEventListener("click", (event) => {
-        if (!$("avatarMenu").contains(event.target)) {
-            setAvatarMenu(false);
-        }
+        if (!$("avatarMenu").contains(event.target)) setAvatarMenu(false);
     });
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            setAvatarMenu(false);
-        }
+        if (event.key === "Escape") setAvatarMenu(false);
     });
 
     [
@@ -943,7 +837,6 @@ async function initializeDashboard() {
                 "hidden",
                 $("filterPeriod").value !== "custom"
             );
-
             updateSummary();
         });
 
@@ -953,7 +846,6 @@ async function initializeDashboard() {
     $("chartPeriod").addEventListener("change", renderChart);
 
     const loggedIn = await loadUser();
-
     if (!loggedIn) return;
 
     await loadBudget();

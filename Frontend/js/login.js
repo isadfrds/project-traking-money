@@ -44,7 +44,7 @@ loginForm.addEventListener("submit", async function (event) {
     loginButton.disabled = true;
 
     try {
-        await apiRequest("/accounts/login/", {
+        await apiRequest("/login/", {
             method: "POST",
             body: JSON.stringify({ email, password })
         });

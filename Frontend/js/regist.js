@@ -54,7 +54,7 @@ registerForm.addEventListener("submit", async function (event) {
     registerButton.disabled = true;
 
     try {
-        await apiRequest("/accounts/register/", {
+        await apiRequest("/register/", {
             method: "POST",
             body: JSON.stringify({
                 name,

@@ -1,5 +1,6 @@
-
-const API_BASE = `http://${window.location.hostname || "127.0.0.1"}:8000/api`;
+// Lokal (Live Server): API di port 8000. Online: API di alamat yang sama (/api).
+const IS_LOCAL = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+const API_BASE = IS_LOCAL ? `http://${window.location.hostname}:8000/api` : "/api";
 
 function getCookie(name) {
     const match = document.cookie
@@ -12,8 +13,9 @@ function getCookie(name) {
 async function apiRequest(path, options = {}) {
     const method = (options.method || "GET").toUpperCase();
 
+    // Pastikan cookie CSRF ada sebelum request yang mengubah data
     if (method !== "GET" && !getCookie("csrftoken")) {
-        const csrfResponse = await fetch(`${API_BASE}/accounts/csrf/`, {
+        const csrfResponse = await fetch(`${API_BASE}/csrf/`, {
             credentials: "include"
         });
 
