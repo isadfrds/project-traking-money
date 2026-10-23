@@ -1,6 +1,11 @@
 import json
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import (
+    authenticate,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -12,9 +17,10 @@ from django.views.decorators.http import require_GET, require_POST
 
 def read_json(request):
     try:
-        return json.loads(request.body or "{}")
-    except json.JSONDecodeError:
+        data = json.loads(request.body or "{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return {}
+    return data if isinstance(data, dict) else {}
 
 
 def user_data(user):
@@ -33,6 +39,7 @@ def csrf(request):
 
 @require_POST
 def register(request):
+    """Buat akun baru. Sengaja TIDAK login otomatis: user diarahkan ke halaman login."""
     data = read_json(request)
     name = str(data.get("name", "")).strip()
     email = str(data.get("email", "")).strip().lower()
@@ -57,8 +64,10 @@ def register(request):
     user = User.objects.create_user(
         username=email, email=email, password=password, first_name=name[:150]
     )
-    login(request, user)
-    return JsonResponse({"user": user_data(user)}, status=201)
+    return JsonResponse(
+        {"message": "Akun berhasil dibuat. Silakan masuk.", "user": user_data(user)},
+        status=201,
+    )
 
 
 @require_POST
@@ -75,12 +84,10 @@ def login_view(request):
     return JsonResponse({"user": user_data(user)})
 
 
-
 @require_POST
 def logout_view(request):
     logout(request)
     return JsonResponse({"message": "Berhasil keluar."})
-
 
 
 @require_GET
@@ -88,3 +95,32 @@ def me(request):
     if not request.user.is_authenticated:
         return JsonResponse({"message": "Belum login."}, status=401)
     return JsonResponse({"user": user_data(request.user)})
+
+
+@require_POST
+def change_password(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Silakan login terlebih dahulu."}, status=401)
+
+    data = read_json(request)
+    old_password = data.get("old_password", "")
+    new_password = data.get("new_password", "")
+
+    if not request.user.check_password(old_password):
+        return JsonResponse({"message": "Password lama salah."}, status=400)
+
+    if old_password == new_password:
+        return JsonResponse(
+            {"message": "Password baru harus berbeda dari password lama."}, status=400
+        )
+
+    try:
+        validate_password(new_password, request.user)
+    except ValidationError as error:
+        return JsonResponse({"message": " ".join(error.messages)}, status=400)
+
+    request.user.set_password(new_password)
+    request.user.save()
+    # Supaya sesi saat ini tetap login setelah password diganti.
+    update_session_auth_hash(request, request.user)
+    return JsonResponse({"message": "Password berhasil diubah."})

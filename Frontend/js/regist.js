@@ -1,5 +1,8 @@
 // apiRequest sudah ada di js/api.js
 
+// Sudah login? Tidak perlu daftar lagi, langsung ke dashboard.
+redirectIfLoggedIn();
+
 const registerForm = document.getElementById("registerForm");
 const registerMessage = document.getElementById("registerMessage");
 const registerButton = document.getElementById("registerButton");
@@ -62,8 +65,13 @@ registerForm.addEventListener("submit", async function (event) {
                 password
             })
         });
-        showRegisterMessage("Akun berhasil dibuat. Mengalihkan...", "success");
-        window.location.href = "index.html";
+        // Setelah daftar, arahkan ke halaman login (tidak langsung masuk dashboard).
+        showRegisterMessage("Akun berhasil dibuat. Mengalihkan ke halaman login...", "success");
+        setTimeout(() => {
+            window.location.replace(
+                `login.html?registered=1&email=${encodeURIComponent(email)}`
+            );
+        }, 900);
     } catch (error) {
         showRegisterMessage(error.message);
         registerButton.disabled = false;

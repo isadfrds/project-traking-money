@@ -124,6 +124,8 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+# Login bertahan 30 hari, jadi tidak perlu login ulang setiap buka web.
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
@@ -172,6 +174,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
+    
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

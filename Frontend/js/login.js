@@ -1,9 +1,11 @@
-
 const loginForm = document.getElementById("loginForm");
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 const loginMessage = document.getElementById("loginMessage");
 const loginButton = document.getElementById("loginButton");
+
+// Sudah login? Langsung ke dashboard, tidak perlu mengisi form lagi.
+redirectIfLoggedIn();
 
 togglePassword.addEventListener("click", function () {
     const passwordIsHidden = passwordInput.type === "password";
@@ -29,6 +31,22 @@ function showLoginMessage(message, type = "error") {
         loginMessage.classList.add("bg-red-50", "text-red-700");
     }
 }
+
+// Pesan dari halaman lain (setelah daftar, atau sesi berakhir)
+(function showIncomingMessage() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("registered") === "1") {
+        const email = params.get("email");
+
+        if (email) document.getElementById("email").value = email;
+
+        showLoginMessage("Akun berhasil dibuat. Silakan masuk dengan akun barumu.", "success");
+        passwordInput.focus();
+    } else if (params.get("expired") === "1") {
+        showLoginMessage("Sesi kamu sudah berakhir. Silakan masuk lagi.");
+    }
+})();
 
 loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();

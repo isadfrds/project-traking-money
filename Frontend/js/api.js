@@ -15,23 +15,52 @@ function getCookie(name) {
     return match ? decodeURIComponent(match.split("=")[1]) : "";
 }
 
+class ApiError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status; // 0 = tidak bisa terhubung ke server
+    }
+}
+
+async function apiFetch(url, options, timeout) {
+    const controller = new AbortController();
+    const timer = timeout ? setTimeout(() => controller.abort(), timeout) : null;
+
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+        throw new ApiError(
+            error.name === "AbortError"
+                ? "Server tidak merespons. Coba lagi sebentar."
+                : "Tidak bisa terhubung ke server. Periksa koneksi internet.",
+            0
+        );
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+}
+
 async function apiRequest(path, options = {}) {
     const method = (options.method || "GET").toUpperCase();
+    const { timeout, ...fetchOptions } = options;
 
     // Pastikan cookie CSRF ada sebelum request yang mengubah data
     if (method !== "GET" && !getCookie("csrftoken")) {
-        const csrfResponse = await fetch(`${API_BASE}/csrf/`, {
-            credentials: "include"
-        });
+        const csrfResponse = await apiFetch(
+            `${API_BASE}/csrf/`,
+            { credentials: "include" },
+            timeout
+        );
 
         if (!csrfResponse.ok) {
-            throw new Error("Gagal mendapatkan token keamanan.");
+            throw new ApiError("Gagal mendapatkan token keamanan.", csrfResponse.status);
         }
     }
 
     const headers = {
         "Content-Type": "application/json",
-        ...(options.headers || {})
+        ...(fetchOptions.headers || {})
     };
 
     if (method !== "GET") {
@@ -42,21 +71,43 @@ async function apiRequest(path, options = {}) {
         }
     }
 
-    const response = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        credentials: "include",
-        headers
-    });
+    const response = await apiFetch(
+        `${API_BASE}${path}`,
+        { ...fetchOptions, credentials: "include", headers },
+        timeout
+    );
 
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(
+        // Sesi habis di tengah pemakaian -> halaman bisa bereaksi (lihat index.js)
+        const isAuthCall = path.startsWith("/login/") || path.startsWith("/me/");
+
+        if (response.status === 401 && !isAuthCall && typeof window.onSessionExpired === "function") {
+            window.onSessionExpired();
+        }
+
+        throw new ApiError(
             data.message ||
             data.error ||
-            `Request gagal dengan status ${response.status}.`
+            `Request gagal dengan status ${response.status}.`,
+            response.status
         );
     }
 
     return data;
+}
+
+// Halaman login & daftar: kalau sudah login, langsung masuk dashboard.
+// Kalau belum (atau server tidak merespons), form ditampilkan seperti biasa.
+async function redirectIfLoggedIn() {
+    try {
+        await apiRequest("/me/", { timeout: 6000 });
+        window.location.replace("index.html");
+        return true;
+    } catch (error) {
+        return false;
+    } finally {
+        document.documentElement.classList.remove("checking");
+    }
 }
