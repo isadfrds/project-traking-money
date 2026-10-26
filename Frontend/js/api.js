@@ -21,23 +21,23 @@ class ApiError extends Error {
     }
 }
 
-// async function apiFetch(url, options, timeout) {
-//     const controller = new AbortController();
-//     const timer = timeout ? setTimeout(() => controller.abort(), timeout) : null;
+async function apiFetch(url, options, timeout) {
+    const controller = new AbortController();
+    const timer = timeout ? setTimeout(() => controller.abort(), timeout) : null;
 
-//     try {
-//         return await fetch(url, { ...options, signal: controller.signal });
-//     } catch (error) {
-//         throw new ApiError(
-//             error.name === "AbortError"
-//                 ? "Server tidak merespons. Coba lagi sebentar."
-//                 : "Tidak bisa terhubung ke server. Periksa koneksi internet.",
-//             0
-//         );
-//     } finally {
-//         if (timer) clearTimeout(timer);
-//     }
-// }
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+        throw new ApiError(
+            error.name === "AbortError"
+                ? "Server tidak merespons. Coba lagi sebentar."
+                : "Tidak bisa terhubung ke server. Periksa koneksi internet.",
+            0
+        );
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+}
 
 async function apiRequest(path, options = {}) {
     const method = (options.method || "GET").toUpperCase();
