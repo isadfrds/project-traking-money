@@ -3,9 +3,7 @@
 // Online (Vercel): API di alamat yang sama (/api). Vercel meneruskan /api/* ke backend
 // lewat rewrites di vercel.json, jadi cookie login & CSRF tetap satu domain.
 const IS_LOCAL = ["127.0.0.1", "localhost"].includes(window.location.hostname);
-const API_BASE = IS_LOCAL
-    ? `https://project-traking-money-t7rp.vercel.app/api`
-    : "/api";
+const API_BASE = `https://project-traking-money-t7rp.vercel.app/api`;
 
 function getCookie(name) {
     const match = document.cookie
