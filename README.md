@@ -33,11 +33,11 @@ Menjalankan tes backend: `python manage.py test` (24 tes: aturan saldo, target t
 - Start Command: `gunicorn config.wsgi:application`
 - Environment variables:
   - `SECRET_KEY` = string acak panjang
-  - `DEBUG` = `False`
+  - `DEBUG` = `False` (wajib untuk production; jangan tampilkan halaman debug Django)
   - `DATABASE_URL` = connection string Neon (ada `sslmode=require`)
-  - `ALLOWED_HOSTS` = domain backend, mis. `moneytrack-api.onrender.com`
-  - `CSRF_TRUSTED_ORIGINS` = `https://domain-vercel-kamu.vercel.app`
-  - `CORS_ALLOWED_ORIGINS` = `https://domain-vercel-kamu.vercel.app`
+  - `ALLOWED_HOSTS` = hostname backend tanpa skema, mis. `moneytrack-api.onrender.com`
+  - `CSRF_TRUSTED_ORIGINS` = origin frontend, mis. `https://project-traking-money-frontend.vercel.app` (tanpa slash akhir)
+  - `CORS_ALLOWED_ORIGINS` = origin frontend yang sama (tanpa slash akhir; dipakai jika frontend mengakses backend langsung)
 - Cek: buka `https://domain-backend/api/health/`, harus muncul `{"status": "ok", ...}`.
 
 ## Deploy frontend (Vercel)

@@ -1,6 +1,7 @@
 
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import dj_database_url
 from dotenv import load_dotenv
@@ -13,12 +14,15 @@ SECRET_KEY = os.getenv("SECRET_KEY", "")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
-    ).split(",")
-    if host.strip()
+    host
+    for host in (
+        urlsplit(value.strip() if "://" in value else f"//{value.strip()}").hostname
+        for value in os.getenv(
+            "ALLOWED_HOSTS",
+            "127.0.0.1,localhost"
+        ).split(",")
+    )
+    if host
 ]
 
 # Render mengisi variabel ini otomatis, jadi tidak perlu diketik manual.
@@ -105,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    origin.strip()
+    origin.strip().rstrip("/")
     for origin in os.getenv(
         "CORS_ALLOWED_ORIGINS",
         "http://127.0.0.1:5500,http://localhost:5500",
@@ -116,7 +120,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
+    origin.strip().rstrip("/")
     for origin in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
         "http://127.0.0.1:5500,http://localhost:5500",
