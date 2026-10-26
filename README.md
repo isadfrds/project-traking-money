@@ -42,7 +42,7 @@ Menjalankan tes backend: `python manage.py test` (24 tes: aturan saldo, target t
 
 ## Deploy frontend (Vercel)
 - Root Directory: `Frontend`
-- Edit `Frontend/vercel.json`: ganti `GANTI-DENGAN-DOMAIN-BACKEND-KAMU` dengan domain backend (tanpa `https://`, tanpa `/api`).
+- Rewrite API di `Frontend/vercel.json` meneruskan `/api/*` ke `https://project-traking-money-t7rp.vercel.app/api/*`.
 - Push ke GitHub, Vercel deploy otomatis.
 
 ## Keamanan
