@@ -5,7 +5,7 @@
 const IS_LOCAL = ["127.0.0.1", "localhost"].includes(window.location.hostname);
 const API_BASE = IS_LOCAL
     ? `http://${window.location.hostname}:8000/api`
-    : "https://project-traking-money-t7rp.vercel.app/api";
+    : "/api";
 
 function getCookie(name) {
     const match = document.cookie
